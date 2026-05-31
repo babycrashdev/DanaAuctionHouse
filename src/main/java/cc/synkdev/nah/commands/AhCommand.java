@@ -213,4 +213,10 @@ public class AhCommand extends BaseCommand {
             p.sendMessage(core.prefix()+ChatColor.RED+Lang.translate("noPerm", core));
         }
     }
+
+    @Subcommand("admin|editgui|leaderboard|transactions|sellinv|punish|import")
+    @CommandPermission("nah.premiumcommands")
+    public void onNAHP(Player p) {
+        p.sendMessage(core.prefix()+Lang.translate("premiumOnly", core));
+    }
 }

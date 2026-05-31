@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -105,6 +106,7 @@ public final class NexusAuctionHouse extends JavaPlugin implements NexusPlugin, 
             Metrics metrics = new Metrics(this, 23102);
             metrics.addCustomChart(new SingleLineChart("money", () -> money));
             metrics.addCustomChart(new SingleLineChart("volume", () -> runningBINs.size()));
+            metrics.addCustomChart(new SimplePie("free", () -> "Free"));
             Analytics.registerSpl(this);
 
             BannedItemsManager.read();
@@ -309,7 +311,7 @@ public final class NexusAuctionHouse extends JavaPlugin implements NexusPlugin, 
 
     @Override
     public String ver() {
-        return "2.2.7";
+        return "2.2.8";
     }
 
     @Override

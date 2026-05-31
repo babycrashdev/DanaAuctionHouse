@@ -84,6 +84,8 @@ permissions:
   nah.pricelimit.bypass:
     description: "Bypass the price limit"
     default: op
+  nah.premiumcommands:
+    default: true
 softdepend:
   - NexusCore
   - Vault
