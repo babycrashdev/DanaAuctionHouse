@@ -50,4 +50,7 @@ public class ItemUnlistEvent extends Event implements Cancellable {
     public void setCancelled(boolean b) {
         this.cancel = b;
     }
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
 }

@@ -39,4 +39,7 @@ public class ItemUnbanEvent extends Event implements Cancellable {
     public void setCancelled(boolean b) {
         this.cancellable = b;
     }
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
 }
