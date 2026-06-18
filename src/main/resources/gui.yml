@@ -1,0 +1,12 @@
+filler: "GRAY_STAINED_GLASS_PANE"
+buttons:
+  previous-page: "ARROW"
+  next-page: "ARROW"
+  confirm: "GREEN_WOOL"
+  cancel: "BARRIER"
+  search: "OAK_SIGN"
+  retrieve: "CHEST"
+  sort: "HOPPER"
+  back: "BARRIER"
+  create-sort: "GREEN_WOOL"
+  close: "BARRIER"

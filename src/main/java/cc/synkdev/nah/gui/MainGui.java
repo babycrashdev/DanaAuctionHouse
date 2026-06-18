@@ -6,7 +6,8 @@ import cc.synkdev.nah.manager.Util;
 import cc.synkdev.nah.objects.BINAuction;
 import cc.synkdev.nah.objects.ItemSort;
 import cc.synkdev.nah.objects.SortingTypes;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
+import cc.synkdev.nah.manager.FileManager;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.components.util.GuiFiller;
 import dev.triumphteam.gui.guis.Gui;
@@ -48,8 +49,8 @@ public class MainGui {
                 .rows(6)
                 .create();
 
-        gui.getFiller().fillBottom(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).name(Component.text(" ")).asGuiItem());
-        if (!core.itemSorts.isEmpty()) gui.getFiller().fillSide(GuiFiller.Side.LEFT, List.of(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).name(Component.text(" ")).asGuiItem()));
+        gui.getFiller().fillBottom(ItemBuilder.from(FileManager.getGuiMaterial("filler", Material.GRAY_STAINED_GLASS_PANE)).name(Component.text(" ")).asGuiItem());
+        if (!core.itemSorts.isEmpty()) gui.getFiller().fillSide(GuiFiller.Side.LEFT, List.of(ItemBuilder.from(FileManager.getGuiMaterial("filler", Material.GRAY_STAINED_GLASS_PANE)).name(Component.text(" ")).asGuiItem()));
         if (page > 1) {
             gui.setItem(6, 4, arrowLeft(page));
         }
@@ -92,7 +93,7 @@ public class MainGui {
         }
 
         gui.setItem(6, 2, search());
-        gui.setItem(6, 9, ItemBuilder.from(Material.CHEST)
+        gui.setItem(6, 9, ItemBuilder.from(FileManager.getGuiMaterial("buttons.retrieve", Material.CHEST))
                 .name(Component.text(ChatColor.GOLD+Lang.translate("titleRetrieve", core)))
                         .lore(Component.text(""), Component.text("  "+Lang.translate("retrieveCount", core, core.retrieveMap.getOrDefault(p.getUniqueId(), new ArrayList<>()).size()+"")), Component.text(""), Component.text(Lang.translate("clickBrowse", core)))
                 .asGuiItem(event -> {
@@ -114,7 +115,7 @@ public class MainGui {
         return gui;
     }
     GuiItem arrowLeft(int page) {
-        return ItemBuilder.from(Material.ARROW)
+        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.previous-page", Material.ARROW))
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("prevPage", core))))
                 .asGuiItem(inventoryClickEvent -> {
                     Player p = (Player) inventoryClickEvent.getWhoClicked();
@@ -122,7 +123,7 @@ public class MainGui {
                 });
     }
     GuiItem arrowRight(int page) {
-        return ItemBuilder.from(Material.ARROW)
+        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.next-page", Material.ARROW))
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("nextPage", core))))
                 .asGuiItem(inventoryClickEvent -> {
                     Player p = (Player) inventoryClickEvent.getWhoClicked();
@@ -253,7 +254,7 @@ public class MainGui {
         lore.add(Component.text(""));
         lore.add(Component.text(Lang.translate("clickScroll", core)));
 
-        return ItemBuilder.from(Material.HOPPER)
+        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.sort", Material.HOPPER))
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("sort", core))))
                 .lore(lore)
                 .asGuiItem(event -> {
@@ -300,7 +301,7 @@ public class MainGui {
         }
         lore.add(Component.text(""));
         lore.add(Component.text(Lang.translate("clickSearch", core)));
-        return ItemBuilder.from(Material.OAK_SIGN)
+        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.search", Material.OAK_SIGN))
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e"+Lang.translate("search", core))))
                 .flags(ItemFlag.HIDE_ATTRIBUTES)
                 .lore(lore)

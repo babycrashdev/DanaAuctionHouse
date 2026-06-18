@@ -5,7 +5,7 @@ import cc.synkdev.nah.api.NAHUtil;
 import cc.synkdev.nah.api.events.ItemUnlistEvent;
 import cc.synkdev.nah.manager.DataFileManager;
 import cc.synkdev.nah.objects.BINAuction;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;

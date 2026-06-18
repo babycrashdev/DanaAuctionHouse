@@ -5,7 +5,7 @@ import cc.synkdev.nah.api.NAHUtil;
 import cc.synkdev.nah.gui.ConfirmSellGui;
 import cc.synkdev.nah.objects.BINAuction;
 import cc.synkdev.nexusCore.bukkit.Analytics;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import dev.triumphteam.gui.guis.Gui;
