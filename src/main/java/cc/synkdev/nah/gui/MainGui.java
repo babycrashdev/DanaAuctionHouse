@@ -9,6 +9,8 @@ import cc.synkdev.nah.objects.SortingTypes;
 import cc.synkdev.nah.manager.Lang;
 import cc.synkdev.nah.manager.FileManager;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
+import dev.triumphteam.gui.builder.item.SkullBuilder;
+import dev.triumphteam.gui.builder.item.BaseItemBuilder;
 import dev.triumphteam.gui.components.util.GuiFiller;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -27,7 +29,6 @@ import java.util.List;
 
 public class MainGui {
     NexusAuctionHouse core = NexusAuctionHouse.getInstance();
-    int max = (core.runningBINs.size()+39)/40;
     int page;
     String searchS;
     int firstSort;
@@ -43,44 +44,75 @@ public class MainGui {
         this.firstSort = firstSort;
         this.itSort = itSort;
         SortingTypes sort = core.playerSortingTypes.getOrDefault(p.getUniqueId(), SortingTypes.PRICEMIN);
+
+        List<Integer> listingSlots = FileManager.getGui().getIntegerList("menus.main.listing-slots");
+        if (listingSlots.isEmpty()) {
+            listingSlots = new ArrayList<>();
+            for (int i = 0; i < 45; i++) {
+                if (i % 9 != 0) listingSlots.add(i);
+            }
+        }
+        int itemsPerPage = listingSlots.size();
+        int max = (core.runningBINs.size()+ (itemsPerPage - 1)) / itemsPerPage;
+
         Gui gui = Gui.gui()
                 .disableAllInteractions()
-                .title(Component.text(ChatColor.YELLOW+Lang.translate("ah", core)))
-                .rows(6)
+                .title(FileManager.getGuiTitle("main", "&eAuction House"))
+                .rows(FileManager.getGuiRows("main", 6))
                 .create();
 
-        gui.getFiller().fillBottom(ItemBuilder.from(FileManager.getGuiMaterial("filler", Material.GRAY_STAINED_GLASS_PANE)).name(Component.text(" ")).asGuiItem());
-        if (!core.itemSorts.isEmpty()) gui.getFiller().fillSide(GuiFiller.Side.LEFT, List.of(ItemBuilder.from(FileManager.getGuiMaterial("filler", Material.GRAY_STAINED_GLASS_PANE)).name(Component.text(" ")).asGuiItem()));
-        if (page > 1) {
-            gui.setItem(6, 4, arrowLeft(page));
-        }
-        if (page < max) {
-            gui.setItem(6, 6, arrowRight(page));
-        }
-        gui.setItem(6, 8, sorter(p, page, search));
+        gui.getFiller().fill(FileManager.getFillerItem("main"));
 
-        if (firstSort > 0) {
-            gui.setItem(1, 1, ItemBuilder.from(Material.ARROW).name(Component.text(Lang.translate("sorts", core))).lore(Component.empty(), Component.text(Lang.translate("scrollSorts", core))).asGuiItem(event -> gui(p, page, search, firstSort-1, itSort).open(p)));
+        int prevPageSlot = FileManager.getGuiSlot("main", "previous-page", 48);
+        int nextPageSlot = FileManager.getGuiSlot("main", "next-page", 50);
+
+        if (page > 1 && prevPageSlot >= 0) {
+            gui.setItem(prevPageSlot, arrowLeft(page));
+        }
+        if (page < max && nextPageSlot >= 0) {
+            gui.setItem(nextPageSlot, arrowRight(page));
+        }
+
+        int sorterSlot = FileManager.getGuiSlot("main", "sort", 52);
+        if (sorterSlot >= 0) {
+            gui.setItem(sorterSlot, sorter(p, page, search));
+        }
+
+        int scrollUpSlot = FileManager.getGuiSlot("main", "sorts-scroll-up", 0);
+        if (firstSort > 0 && scrollUpSlot >= 0) {
+            gui.setItem(scrollUpSlot, FileManager.getGuiItem("main", "sorts-scroll-up", Material.ARROW, "&eSorts", Arrays.asList("", "&eClick to scroll"), event -> {
+                gui(p, page, search, firstSort - 1, itSort).open(p);
+            }));
         }
 
         boolean useFirst = firstSort<=0;
-        if (core.itemSorts.size() > 5 && core.itemSorts.size() >= firstSort+6) {
-            gui.setItem(6, 1, ItemBuilder.from(Material.ARROW).name(Component.text(Lang.translate("sorts", core))).lore(Component.empty(), Component.text(Lang.translate("scrollSorts", core))).asGuiItem(event -> gui(p, page, search, firstSort+1, itSort).open(p)));
+        int scrollDownSlot = FileManager.getGuiSlot("main", "sorts-scroll-down", 45);
+        if (core.itemSorts.size() > 5 && core.itemSorts.size() >= firstSort+6 && scrollDownSlot >= 0) {
+            gui.setItem(scrollDownSlot, FileManager.getGuiItem("main", "sorts-scroll-down", Material.ARROW, "&eSorts", Arrays.asList("", "&eClick to scroll"), event -> {
+                gui(p, page, search, firstSort + 1, itSort).open(p);
+            }));
         }
+
         int index = firstSort;
-        for (int i = useFirst ? 1 : 2; i < 6; i++) {
+        int startRow = useFirst ? 1 : 2;
+        for (int i = startRow; i < 6; i++) {
             if (core.itemSorts.size() <= index) break;
 
             ItemSort iSort = core.itemSorts.entrySet().stream().toList().get(index).getValue();
             boolean same = iSort == itSort;
-            gui.setItem(i, 1, ItemBuilder.from(iSort.getIcon()).glow(same).flags(ItemFlag.HIDE_ATTRIBUTES).name(Component.text(ChatColor.YELLOW+iSort.getName())).lore(Component.empty(), Component.text(Lang.translate((same ? "clickUnsort" : "clickSort"), core))).asGuiItem(event -> {
-                if (same) {
-                    gui(p, page, search, firstSort, null).open(p);
-                } else {
-                    gui(p, page, search, firstSort, iSort).open(p);
-                }
-
-            }));
+            int categorySlot = (i - 1) * 9;
+            gui.setItem(categorySlot, ItemBuilder.from(iSort.getIcon())
+                    .glow(same)
+                    .flags(ItemFlag.HIDE_ATTRIBUTES)
+                    .name(FileManager.parseMiniMessage("<yellow>" + iSort.getName()))
+                    .lore(Component.empty(), Lang.translateComp(same ? "clickUnselect" : "clickSelect"))
+                    .asGuiItem(event -> {
+                        if (same) {
+                            gui(p, page, search, firstSort, null).open(p);
+                        } else {
+                            gui(p, page, search, firstSort, iSort).open(p);
+                        }
+                    }));
             index++;
         }
 
@@ -92,49 +124,67 @@ public class MainGui {
             fillGui(gui, p, page, sort);
         }
 
-        gui.setItem(6, 2, search());
-        gui.setItem(6, 9, ItemBuilder.from(FileManager.getGuiMaterial("buttons.retrieve", Material.CHEST))
-                .name(Component.text(ChatColor.GOLD+Lang.translate("titleRetrieve", core)))
-                        .lore(Component.text(""), Component.text("  "+Lang.translate("retrieveCount", core, core.retrieveMap.getOrDefault(p.getUniqueId(), new ArrayList<>()).size()+"")), Component.text(""), Component.text(Lang.translate("clickBrowse", core)))
-                .asGuiItem(event -> {
-                    NAHUtil.openExpiredGui(p);
+        int searchSlot = FileManager.getGuiSlot("main", "search", 46);
+        if (searchSlot >= 0) {
+            gui.setItem(searchSlot, search());
+        }
+
+        int retrieveSlot = FileManager.getGuiSlot("main", "retrieve", 53);
+        if (retrieveSlot >= 0) {
+            gui.setItem(retrieveSlot, FileManager.getGuiItemBuilder("main", "retrieve", Material.CHEST, "&r&e&lRetrieve Items", null)
+                    .lore(Component.empty(), Lang.translateComp("retrieveCount", core.retrieveMap.getOrDefault(p.getUniqueId(), new ArrayList<>()).size() + ""), Component.empty(), Lang.translateComp("clickBrowse"))
+                    .asGuiItem(event -> {
+                        NAHUtil.openExpiredGui(p);
+                    }));
+        }
+
+        int viewOwnSlot = FileManager.getGuiSlot("main", "view-own", 49);
+        if (p.hasPermission("nah.menu.player.own") && viewOwnSlot >= 0) {
+            BaseItemBuilder<?> builder = FileManager.getGuiItemBuilder("main", "view-own", Material.PLAYER_HEAD, "&r&eView Your Listings", null);
+            if (builder instanceof SkullBuilder skullBuilder) {
+                gui.setItem(viewOwnSlot, skullBuilder.owner(p).asGuiItem(event -> {
+                    if (event.getWhoClicked().hasPermission("nah.menu.player.own")) {
+                        NAHUtil.openPlayerListings(p, p, new MainGuiSnapshot(page, search, firstSort, itSort));
+                    } else {
+                        event.getWhoClicked().sendMessage(core.prefix()+ChatColor.RED+Lang.translate("noPerm", core));
+                    }
                 }));
-        if (p.hasPermission("nah.menu.player.own")) {
-                gui.setItem(6, 5, ItemBuilder.skull().owner(p)
-                        .name(Component.text(Lang.translate("viewOwn", core)))
-                        .lore(Component.empty(), Component.text(Lang.translate("clickBrowse", core)))
-                        .asGuiItem(event -> {
-                            if (event.getWhoClicked().hasPermission("nah.menu.player.own")) {
-                                NAHUtil.openPlayerListings(p, p, new MainGuiSnapshot(page, search, firstSort, itSort));
-                            } else {
-                                event.getWhoClicked().sendMessage(core.prefix()+ChatColor.RED+Lang.translate("noPerm", core));
-                            }
-                        })
-                );
+            } else {
+                gui.setItem(viewOwnSlot, builder.asGuiItem(event -> {
+                    if (event.getWhoClicked().hasPermission("nah.menu.player.own")) {
+                        NAHUtil.openPlayerListings(p, p, new MainGuiSnapshot(page, search, firstSort, itSort));
+                    } else {
+                        event.getWhoClicked().sendMessage(core.prefix()+ChatColor.RED+Lang.translate("noPerm", core));
+                    }
+                }));
             }
+        }
         return gui;
     }
     GuiItem arrowLeft(int page) {
-        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.previous-page", Material.ARROW))
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("prevPage", core))))
-                .asGuiItem(inventoryClickEvent -> {
-                    Player p = (Player) inventoryClickEvent.getWhoClicked();
-                    gui(p, page-1, null, 0, itSort).open(p);
-                });
+        return FileManager.getGuiItem("main", "previous-page", Material.ARROW, "&r&e&lPrevious Page", null, inventoryClickEvent -> {
+            Player p = (Player) inventoryClickEvent.getWhoClicked();
+            gui(p, page-1, null, 0, itSort).open(p);
+        });
     }
     GuiItem arrowRight(int page) {
-        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.next-page", Material.ARROW))
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("nextPage", core))))
-                .asGuiItem(inventoryClickEvent -> {
-                    Player p = (Player) inventoryClickEvent.getWhoClicked();
-                    gui(p, page+1, null, 0, itSort).open(p);
-                });
+        return FileManager.getGuiItem("main", "next-page", Material.ARROW, "&r&e&lNext Page", null, inventoryClickEvent -> {
+            Player p = (Player) inventoryClickEvent.getWhoClicked();
+            gui(p, page+1, null, 0, itSort).open(p);
+        });
     }
     private void fillGui(Gui gui, Player p, int page, SortingTypes sort, ItemSort itemSort) {
-        int min = 40 * (page - 1);
-        int max = 40 * page;
+        List<Integer> listingSlots = FileManager.getGui().getIntegerList("menus.main.listing-slots");
+        if (listingSlots.isEmpty()) {
+            listingSlots = new ArrayList<>();
+            for (int i = 0; i < 45; i++) {
+                if (i % 9 != 0) listingSlots.add(i);
+            }
+        }
+        int min = listingSlots.size() * (page - 1);
+        int max = listingSlots.size() * page;
 
-        int guiSlot = 0;
+        int guiSlotIndex = 0;
 
         for (int i = min; i < max; i++) {
             if (sort.list.size() <= i) break;
@@ -144,48 +194,59 @@ public class MainGui {
                 continue;
             }
 
-            while (guiSlot < 54 && guiSlot % 9 == 0) {
-                guiSlot++;
-            }
+            if (guiSlotIndex >= listingSlots.size()) break;
+            int slot = listingSlots.get(guiSlotIndex);
 
-            if (guiSlot >= 54) break;
-
-            gui.setItem(guiSlot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
-            guiSlot++;
+            gui.setItem(slot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+            guiSlotIndex++;
         }
     }
     private void fillGui(Gui gui, Player p, int page, SortingTypes sort) {
-        int min = 45*(page-1);
-        int max = 45*page;
+        List<Integer> listingSlots = FileManager.getGui().getIntegerList("menus.main.listing-slots");
+        if (listingSlots.isEmpty()) {
+            listingSlots = new ArrayList<>();
+            for (int i = 0; i < 45; i++) {
+                if (i % 9 != 0) listingSlots.add(i);
+            }
+        }
+        int min = listingSlots.size()*(page-1);
+        int max = listingSlots.size()*page;
 
+        int guiSlotIndex = 0;
         for (int i = min; i < max; i++) {
             if (sort.list.size() > i) {
                 BINAuction bA = sort.list.get(i);
-                gui.setItem(i - min, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+                if (guiSlotIndex >= listingSlots.size()) break;
+                gui.setItem(listingSlots.get(guiSlotIndex), buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+                guiSlotIndex++;
             }
         }
     }
 
     private void fillGui(Gui gui, Player p, int page, String research) {
-        int min = 40*(page-1);
-        int max = 40*page;
+        List<Integer> listingSlots = FileManager.getGui().getIntegerList("menus.main.listing-slots");
+        if (listingSlots.isEmpty()) {
+            listingSlots = new ArrayList<>();
+            for (int i = 0; i < 45; i++) {
+                if (i % 9 != 0) listingSlots.add(i);
+            }
+        }
+        int min = listingSlots.size()*(page-1);
+        int max = listingSlots.size()*page;
 
         List<BINAuction> list = new ArrayList<>(Util.searchList(research, core.playerSortingTypes.getOrDefault(p.getUniqueId(), SortingTypes.PRICEMIN)));
-        int guiSlot = 0;
+        int guiSlotIndex = 0;
 
         for (int i = min; i < max; i++) {
             if (list.size() <= i) break;
 
             BINAuction bA = list.get(i);
 
-            while (guiSlot < 54 && guiSlot % 9 == 0) {
-                guiSlot++;
-            }
+            if (guiSlotIndex >= listingSlots.size()) break;
+            int slot = listingSlots.get(guiSlotIndex);
 
-            if (guiSlot >= 54) break;
-
-            gui.setItem(guiSlot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
-            guiSlot++;
+            gui.setItem(slot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+            guiSlotIndex++;
         }
     }
     GuiItem buyableItem(BINAuction bA, Boolean staff, Boolean self) {
@@ -195,15 +256,20 @@ public class MainGui {
         if (!shulker) {
             lore.addAll(Util.loreToComps(bA.getItem()));
         }
-        lore.addAll(Arrays.asList(Component.text(""), Component.text("  "+Lang.translate("price", core, Long.toString(bA.getPrice()))), Component.text("  "+Lang.translate("seller", core, Util.getName(bA.getSeller()))), Component.text("  "+Lang.translate("expiry", core, Util.convertSecondsToTime(bA.getExpiry()))), Component.text(""), Component.text(Lang.translate("buyNow", core))));
+        lore.add(Component.empty());
+        lore.add(Lang.translateComp("price", Long.toString(bA.getPrice())));
+        lore.add(Lang.translateComp("seller", Util.getName(bA.getSeller())));
+        lore.add(Lang.translateComp("expiry", Util.convertSecondsToTime(bA.getExpiry())));
+        lore.add(Component.empty());
+        lore.add(Lang.translateComp("buyNow"));
         if (shulker) {
-            lore.add(Component.text(Lang.translate("shulkerMenu", core)));
+            lore.add(Lang.translateComp("shulkerMenu"));
         }
         if (staff) {
-            lore.add(Component.text(Lang.translate("staffMenu", core)));
+            lore.add(Lang.translateComp("staffMenu"));
         }
         if (p.hasPermission("nah.manage.unlist.own") && self) {
-            lore.add(Component.text(Lang.translate("own-lore", core)));
+            lore.add(Lang.translateComp("own-lore"));
         }
         return ItemBuilder.from(copy)
                 .lore(lore)
@@ -242,7 +308,7 @@ public class MainGui {
     }
     GuiItem sorter(Player p, int page, String search) {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text(""));
+        lore.add(Component.empty());
         for (SortingTypes sT : core.sortingTypes) {
             String arrow = ChatColor.RESET+"  "+ChatColor.YELLOW+"-> "+ChatColor.BOLD;
             if (core.playerSortingTypes.getOrDefault(p.getUniqueId(), SortingTypes.PRICEMIN) == sT) {
@@ -251,11 +317,10 @@ public class MainGui {
                 lore.add(Component.text(ChatColor.RESET+"  "+ChatColor.YELLOW+sT.string));
             }
         }
-        lore.add(Component.text(""));
-        lore.add(Component.text(Lang.translate("clickScroll", core)));
+        lore.add(Component.empty());
+        lore.add(Lang.translateComp("clickScroll"));
 
-        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.sort", Material.HOPPER))
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("sort", core))))
+        return FileManager.getGuiItemBuilder("main", "sort", Material.HOPPER, "&r&e&lSort Options", null)
                 .lore(lore)
                 .asGuiItem(event -> {
                     Player pl = (Player) event.getWhoClicked();
@@ -295,15 +360,13 @@ public class MainGui {
     GuiItem search() {
         List<Component> lore = new ArrayList<>();
         if (searchS != null) {
-            lore.add(Component.text(""));
-            lore.add(Component.text("  "+Lang.translate("currSearch", core, searchS)));
-            lore.add(Component.text("  "+Lang.translate("searchReset", core)));
+            lore.add(Component.empty());
+            lore.add(Lang.translateComp("currSearch", searchS));
+            lore.add(Lang.translateComp("searchReset"));
         }
-        lore.add(Component.text(""));
-        lore.add(Component.text(Lang.translate("clickSearch", core)));
-        return ItemBuilder.from(FileManager.getGuiMaterial("buttons.search", Material.OAK_SIGN))
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e"+Lang.translate("search", core))))
-                .flags(ItemFlag.HIDE_ATTRIBUTES)
+        lore.add(Component.empty());
+        lore.add(Lang.translateComp("clickSearch"));
+        return FileManager.getGuiItemBuilder("main", "search", Material.OAK_SIGN, "&r&eSearch", null)
                 .lore(lore)
                 .asGuiItem(event -> {
                     Player p = (Player) event.getWhoClicked();
@@ -319,7 +382,7 @@ public class MainGui {
 
                     ItemStack out = new ItemStack(Material.PAPER);
                     ItemMeta meta = out.getItemMeta();
-                    meta.setDisplayName(ChatColor.GOLD+Lang.translate("search", core));
+                    meta.displayName(Lang.translateComp("search"));
                     out.setItemMeta(meta);
                     anvil.itemOutput(out);
 

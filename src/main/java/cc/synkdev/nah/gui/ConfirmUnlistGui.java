@@ -6,6 +6,7 @@ import cc.synkdev.nah.api.events.ItemUnlistEvent;
 import cc.synkdev.nah.manager.DataFileManager;
 import cc.synkdev.nah.objects.BINAuction;
 import cc.synkdev.nah.manager.Lang;
+import cc.synkdev.nah.manager.FileManager;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -31,27 +32,34 @@ public class ConfirmUnlistGui {
         this.bA = bA;
         item = bA.getItem();
         Gui gui = Gui.gui()
-                .title(Component.text(ChatColor.YELLOW+ Lang.translate("confirmUnlist", core)))
-                .rows(4)
+                .title(FileManager.getGuiTitle("confirm-unlist", "&eConfirm Unlist"))
+                .rows(FileManager.getGuiRows("confirm-unlist", 4))
                 .disableAllInteractions()
                 .create();
-        gui.getFiller().fill(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).name(Component.text(" ")).asGuiItem());
-        gui.setItem(2, 5, item());
-        gui.setItem(3, 3, confirm());
-        gui.setItem(3, 7, cancel());
+        gui.getFiller().fill(FileManager.getFillerItem("confirm-unlist"));
+        
+        int itemSlot = FileManager.getGuiSlot("confirm-unlist", "item-slot", 13);
+        if (itemSlot >= 0) {
+            gui.setItem(itemSlot, item());
+        }
+
+        int confirmSlot = FileManager.getGuiSlot("confirm-unlist", "confirm", 20);
+        if (confirmSlot >= 0) {
+            gui.setItem(confirmSlot, confirm());
+        }
+
+        int cancelSlot = FileManager.getGuiSlot("confirm-unlist", "cancel", 24);
+        if (cancelSlot >= 0) {
+            gui.setItem(cancelSlot, cancel());
+        }
         return gui;
     }
 
     GuiItem item() {
-        return ItemBuilder.from(bA.getItem().clone()).lore(Component.text(""), Component.text(Lang.translate("lore-unlist-item", core))).asGuiItem();
+        return ItemBuilder.from(bA.getItem().clone()).lore(Component.empty(), Lang.translateComp("lore-unlist-item")).asGuiItem();
     }
     GuiItem confirm() {
-        ItemStack item = new ItemStack(Material.GREEN_WOOL);
-        ItemMeta meta = item.getItemMeta();
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r&c&l"+Lang.translate("confirm", core)));
-        item.setItemMeta(meta);
-        return ItemBuilder.from(item).asGuiItem(event -> {
+        return FileManager.getGuiItem("confirm-unlist", "confirm", Material.GREEN_WOOL, "&r&c&lConfirm", null, event -> {
             Player pl = (Player) event.getWhoClicked();
             BINAuction bAa = NAHUtil.getAuction(bA.getId());
             if (bAa.getBuyable()) {
@@ -77,11 +85,6 @@ public class ConfirmUnlistGui {
         });
     }
     GuiItem cancel() {
-        ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r&c&l"+Lang.translate("cancel", core)));
-        item.setItemMeta(meta);
-        return ItemBuilder.from(item).asGuiItem(event -> NAHUtil.open(p, false, null, 1));
+        return FileManager.getGuiItem("confirm-unlist", "cancel", Material.BARRIER, "&r&c&lCancel", null, event -> NAHUtil.open(p, false, null, 1));
     }
 }
