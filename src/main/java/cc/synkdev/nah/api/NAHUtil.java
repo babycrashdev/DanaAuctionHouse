@@ -238,6 +238,49 @@ public class NAHUtil {
      * @return The slots cap
      */
     public static int getSlotsLimit(Player p) {
+        org.bukkit.configuration.file.FileConfiguration config = core.getConfig();
+        if (config.contains("limit-slots")) {
+            String prefix = config.getString("limit-slots.Permission_Prefix", "auctionhouse.slot.amount.");
+            int defaultValue = config.getInt("limit-slots.Default_Value", 2);
+            int maxLimit = -2;
+            boolean hasAnyMatching = false;
+
+            if (config.isConfigurationSection("limit-slots.Values")) {
+                for (String key : config.getConfigurationSection("limit-slots.Values").getKeys(false)) {
+                    String perm = prefix + key;
+                    if (p.hasPermission(perm)) {
+                        int val = config.getInt("limit-slots.Values." + key);
+                        if (val == -1) {
+                            return -1;
+                        }
+                        if (val > maxLimit) {
+                            maxLimit = val;
+                        }
+                        hasAnyMatching = true;
+                    }
+                }
+            }
+
+            for (PermissionAttachmentInfo perm : p.getEffectivePermissions()) {
+                String s = perm.getPermission();
+                if (s.startsWith("nah.slots.")) {
+                    try {
+                        int val = Integer.parseInt(s.replace("nah.slots.", ""));
+                        if (val == -1) return -1;
+                        if (val > maxLimit) {
+                            maxLimit = val;
+                        }
+                        hasAnyMatching = true;
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            if (hasAnyMatching) {
+                return maxLimit;
+            }
+            return defaultValue;
+        }
+
         int slots = -1;
         for (PermissionAttachmentInfo perm : p.getEffectivePermissions()) {
             String s = perm.getPermission();
