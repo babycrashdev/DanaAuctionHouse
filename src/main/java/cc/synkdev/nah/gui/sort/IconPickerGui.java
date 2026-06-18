@@ -54,7 +54,7 @@ public class IconPickerGui {
         }
         lore.add(Component.text(""));
         lore.add(Component.text(Lang.translate("clickSearch", core)));
-        gui.setItem(6, 2, ItemBuilder.from(Material.SIGN)
+        gui.setItem(6, 2, ItemBuilder.from(Material.OAK_SIGN)
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e"+Lang.translate("search", core))))
                 .flags(ItemFlag.HIDE_ATTRIBUTES)
                 .lore(lore)

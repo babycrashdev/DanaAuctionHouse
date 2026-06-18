@@ -292,7 +292,7 @@ public class MainGui {
         }
         lore.add(Component.text(""));
         lore.add(Component.text(Lang.translate("clickSearch", core)));
-        return ItemBuilder.from(Material.SIGN)
+        return ItemBuilder.from(Material.OAK_SIGN)
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e"+Lang.translate("search", core))))
                 .flags(ItemFlag.HIDE_ATTRIBUTES)
                 .lore(lore)
