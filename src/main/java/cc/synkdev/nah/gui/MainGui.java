@@ -170,13 +170,21 @@ public class MainGui {
         int max = 40*page;
 
         List<BINAuction> list = new ArrayList<>(Util.searchList(research, core.playerSortingTypes.getOrDefault(p.getUniqueId(), SortingTypes.PRICEMIN)));
+        int guiSlot = 0;
+
         for (int i = min; i < max; i++) {
-            int slot = i-min;
-            if (i % 9 == 0) slot = slot+1;
-            if (list.size() > i) {
-                BINAuction bA = list.get(i);
-                gui.setItem(slot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+            if (list.size() <= i) break;
+
+            BINAuction bA = list.get(i);
+
+            while (guiSlot < 54 && guiSlot % 9 == 0) {
+                guiSlot++;
             }
+
+            if (guiSlot >= 54) break;
+
+            gui.setItem(guiSlot, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+            guiSlot++;
         }
     }
     GuiItem buyableItem(BINAuction bA, Boolean staff, Boolean self) {

@@ -30,7 +30,7 @@ public class PlayerAuctionsGui {
         this.snapshot = snapshot;
         this.contents = Util.getPlayerListings(target);
         core.checkExpiry.run();
-        max = (contents.size()+39)/40;
+        max = (contents.size()+44)/45;
         this.target = target;
         this.page = page;
         Gui gui = Gui.gui()

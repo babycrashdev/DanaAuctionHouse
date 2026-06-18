@@ -20,7 +20,7 @@ public class RetrieveGui {
     NexusAuctionHouse core = NexusAuctionHouse.getInstance();
     int max = 0;
     public Gui gui(Player p, int page) {
-        max = (core.retrieveMap.getOrDefault(p.getUniqueId(), new ArrayList<>()).size()/10)+1;
+        max = (core.retrieveMap.getOrDefault(p.getUniqueId(), new ArrayList<>()).size()+44)/45;
         Gui gui = Gui.gui()
                 .disableAllInteractions()
                 .title(Component.text(ChatColor.YELLOW+ Lang.translate("titleRetrieve", core)))
