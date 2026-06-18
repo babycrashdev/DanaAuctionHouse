@@ -54,6 +54,10 @@ public class PlayerAuctionsGui {
 
         gui.getFiller().fill(FileManager.getFillerItem("player-auctions"));
 
+        for (int slot : listingSlots) {
+            gui.removeItem(slot);
+        }
+
         int prevPageSlot = FileManager.getGuiSlot("player-auctions", "previous-page", 48);
         int nextPageSlot = FileManager.getGuiSlot("player-auctions", "next-page", 50);
 
@@ -109,20 +113,25 @@ public class PlayerAuctionsGui {
         if (!shulker) {
             lore.addAll(Util.loreToComps(bA.getItem()));
         }
-        lore.add(Component.empty());
-        lore.add(Lang.translateComp("price", Long.toString(bA.getPrice())));
-        lore.add(Lang.translateComp("seller", Util.getName(bA.getSeller())));
-        lore.add(Lang.translateComp("expiry", Util.convertSecondsToTime(bA.getExpiry())));
-        lore.add(Component.empty());
-        lore.add(Lang.translateComp("buyNow"));
+        List<String> formatLore = FileManager.getGui().getStringList("listing-format.lore");
+        for (String line : formatLore) {
+            line = line.replace("%price%", Long.toString(bA.getPrice()))
+                       .replace("%seller%", Util.getName(bA.getSeller()))
+                       .replace("%expiry%", Util.convertSecondsToTime(bA.getExpiry()));
+            lore.add(FileManager.parseMiniMessage(line));
+        }
+
         if (shulker) {
-            lore.add(Lang.translateComp("shulkerMenu"));
+            List<String> shulkerLore = FileManager.getGui().getStringList("listing-format.shulker-lore");
+            for (String line : shulkerLore) lore.add(FileManager.parseMiniMessage(line));
         }
         if (staff) {
-            lore.add(Lang.translateComp("staffMenu"));
+            List<String> staffLore = FileManager.getGui().getStringList("listing-format.staff-lore");
+            for (String line : staffLore) lore.add(FileManager.parseMiniMessage(line));
         }
         if (self) {
-            lore.add(Lang.translateComp("own-lore"));
+            List<String> ownLore = FileManager.getGui().getStringList("listing-format.own-lore");
+            for (String line : ownLore) lore.add(FileManager.parseMiniMessage(line));
         }
         return ItemBuilder.from(copy)
                 .lore(lore)

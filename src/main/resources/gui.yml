@@ -1,6 +1,21 @@
 # gui.yml - Custom configurations for Auction House GUIs
 
 # Modern Menu Configurations
+listing-format:
+  lore:
+    - ""
+    - "<gray>Price: <yellow>%price%"
+    - "<gray>Seller: <yellow>%seller%"
+    - "<gray>Expiry: <yellow>%expiry%"
+    - ""
+    - "<yellow>Click to Buy Now"
+  shulker-lore:
+    - "<yellow>Shift-Right-Click to view contents"
+  staff-lore:
+    - "<red>Shift-Click to manage this listing."
+  own-lore:
+    - "<yellow>This is your listing."
+
 menus:
   main:
     title: "<yellow>Auction House"

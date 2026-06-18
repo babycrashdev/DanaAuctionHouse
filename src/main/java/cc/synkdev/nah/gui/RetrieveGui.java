@@ -36,6 +36,10 @@ public class RetrieveGui {
         
         gui.getFiller().fill(FileManager.getFillerItem("retrieve"));
 
+        for (int slot : listingSlots) {
+            gui.removeItem(slot);
+        }
+
         int prevPageSlot = FileManager.getGuiSlot("retrieve", "previous-page", 48);
         int nextPageSlot = FileManager.getGuiSlot("retrieve", "next-page", 50);
 

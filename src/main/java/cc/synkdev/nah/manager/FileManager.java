@@ -109,7 +109,7 @@ public class FileManager {
         }
         colorMatcher.appendTail(sb);
 
-        return MiniMessage.miniMessage().deserialize(sb.toString());
+        return MiniMessage.miniMessage().deserialize("<!italic>" + sb.toString());
     }
 
     public static String toLegacy(Component component) {
