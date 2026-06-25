@@ -6,8 +6,10 @@ import cc.synkdev.nah.manager.DataFileManager;
 import cc.synkdev.nah.manager.Util;
 import cc.synkdev.nah.manager.WebhookManager;
 import cc.synkdev.nah.objects.BINAuction;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
+import cc.synkdev.nah.manager.FileManager;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
+import dev.triumphteam.gui.builder.item.BaseItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import net.kyori.adventure.text.Component;
@@ -27,15 +29,27 @@ public class ConfirmBuyGui {
     NexusAuctionHouse core = NexusAuctionHouse.getInstance();
     public Gui gui(BINAuction bA) {
         Gui gui = Gui.gui()
-                .title(Component.text(ChatColor.YELLOW+ Lang.translate("confirmBuy", core)))
-                .rows(4)
+                .title(FileManager.getGuiTitle("confirm-buy", "&eConfirm Purchase"))
+                .rows(FileManager.getGuiRows("confirm-buy", 4))
                 .disableAllInteractions()
                 .create();
 
-        gui.getFiller().fill(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).name(Component.text(" ")).asGuiItem());
-        gui.setItem(2, 5, item(bA));
-        gui.setItem(3, 3, confirm(bA));
-        gui.setItem(3, 7, cancel());
+        gui.getFiller().fill(FileManager.getFillerItem("confirm-buy"));
+        
+        int itemSlot = FileManager.getGuiSlot("confirm-buy", "item-slot", 13);
+        if (itemSlot >= 0) {
+            gui.setItem(itemSlot, item(bA));
+        }
+
+        int confirmSlot = FileManager.getGuiSlot("confirm-buy", "confirm", 20);
+        if (confirmSlot >= 0) {
+            gui.setItem(confirmSlot, confirm(bA));
+        }
+
+        int cancelSlot = FileManager.getGuiSlot("confirm-buy", "cancel", 24);
+        if (cancelSlot >= 0) {
+            gui.setItem(cancelSlot, cancel());
+        }
 
         return gui;
     }
@@ -44,13 +58,11 @@ public class ConfirmBuyGui {
     }
     GuiItem confirm(BINAuction bAa) {
         int tax = Math.toIntExact(Math.round(bAa.getPrice()*((double) core.getBuyTaxPercent()/100)));
-        ItemStack item = new ItemStack(Material.GREEN_WOOL);
-        ItemMeta meta = item.getItemMeta();
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r&c&l"+Lang.translate("confirm", core)));
-        if (core.getBuyTaxPercent() > 0) meta.setLore(new ArrayList<>(Arrays.asList("", ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("taxes", core, core.getBuyTaxPercent()+"", tax+"")))));
-        item.setItemMeta(meta);
-        return ItemBuilder.from(item).asGuiItem(event -> {
+        BaseItemBuilder<?> builder = FileManager.getGuiItemBuilder("confirm-buy", "confirm", Material.GREEN_WOOL, "&r&c&lConfirm", null);
+        if (core.getBuyTaxPercent() > 0) {
+            builder.lore(Component.empty(), Lang.translateComp("taxes", core.getBuyTaxPercent()+"", tax+""));
+        }
+        return builder.asGuiItem(event -> {
             Player pl = (Player) event.getWhoClicked();
             BINAuction bA = NAHUtil.getAuction(bAa.getId());
             if (!bA.getBuyable()) {
@@ -91,12 +103,7 @@ public class ConfirmBuyGui {
         });
     }
     GuiItem cancel() {
-        ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r&c&l"+Lang.translate("cancel", core)));
-        item.setItemMeta(meta);
-        return ItemBuilder.from(item).asGuiItem(event -> {
+        return FileManager.getGuiItem("confirm-buy", "cancel", Material.BARRIER, "&r&c&lCancel", null, event -> {
             Player pl = (Player) event.getWhoClicked();
             pl.closeInventory();
             NAHUtil.open(pl, false, null, 1);

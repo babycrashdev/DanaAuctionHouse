@@ -1,0 +1,179 @@
+# gui.yml - Custom configurations for Auction House GUIs
+
+# Modern Menu Configurations
+listing-format:
+  lore:
+    - ""
+    - "<gray>Price: <yellow>%price%"
+    - "<gray>Seller: <yellow>%seller%"
+    - "<gray>Expiry: <yellow>%expiry%"
+    - ""
+    - "<yellow>Click to Buy Now"
+  shulker-lore:
+    - "<yellow>Shift-Right-Click to view contents"
+  staff-lore:
+    - "<red>Shift-Click to manage this listing."
+  own-lore:
+    - "<yellow>This is your listing."
+
+menus:
+  main:
+    title: "<yellow>Auction House"
+    rows: 6
+    listing-slots: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44]
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      previous-page:
+        material: "ARROW"
+        slot: 48
+        name: "<reset><yellow><bold>Previous Page"
+        lore: []
+      next-page:
+        material: "ARROW"
+        slot: 50
+        name: "<reset><yellow><bold>Next Page"
+        lore: []
+      search:
+        material: "OAK_SIGN"
+        slot: 46
+        name: "<reset><yellow>Search"
+        # lore is dynamically handled
+      retrieve:
+        material: "CHEST"
+        slot: 53
+        name: "<reset><gold>Retrieve Items"
+        # lore is dynamically handled
+      sort:
+        material: "HOPPER"
+        slot: 52
+        name: "<reset><yellow><bold>Sort Options"
+        # lore is dynamically handled
+      view-own:
+        material: "PLAYER_HEAD"
+        slot: 49
+        name: "<reset><yellow>View Your Listings"
+        lore:
+          - ""
+          - "<yellow>Click to browse"
+      sorts-scroll-up:
+        material: "ARROW"
+        slot: 0
+        name: "<yellow>Scroll Sorts Up"
+        lore:
+          - ""
+          - "<yellow>Click to scroll"
+      sorts-scroll-down:
+        material: "ARROW"
+        slot: 45
+        name: "<yellow>Scroll Sorts Down"
+        lore:
+          - ""
+          - "<yellow>Click to scroll"
+
+  confirm-buy:
+    title: "<yellow>Confirm Purchase"
+    rows: 4
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      item-slot: 13
+      confirm:
+        material: "GREEN_WOOL"
+        slot: 20
+        name: "<reset><green><bold>Confirm"
+        lore: []
+      cancel:
+        material: "BARRIER"
+        slot: 24
+        name: "<reset><red><bold>Cancel"
+        lore: []
+
+  confirm-sell:
+    title: "<yellow>Confirm Listing"
+    rows: 4
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      item-slot: 13
+      confirm:
+        material: "GREEN_WOOL"
+        slot: 20
+        name: "<reset><green><bold>Confirm"
+        lore: []
+      cancel:
+        material: "BARRIER"
+        slot: 24
+        name: "<reset><red><bold>Cancel"
+        lore: []
+
+  confirm-unlist:
+    title: "<yellow>Confirm Unlist"
+    rows: 4
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      item-slot: 13
+      confirm:
+        material: "GREEN_WOOL"
+        slot: 20
+        name: "<reset><green><bold>Confirm"
+        lore: []
+      cancel:
+        material: "BARRIER"
+        slot: 24
+        name: "<reset><red><bold>Cancel"
+        lore: []
+
+  retrieve:
+    title: "<yellow>Retrieve Items"
+    rows: 6
+    listing-slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      previous-page:
+        material: "ARROW"
+        slot: 48
+        name: "<reset><yellow><bold>Previous Page"
+        lore: []
+      next-page:
+        material: "ARROW"
+        slot: 50
+        name: "<reset><yellow><bold>Next Page"
+        lore: []
+
+  player-auctions:
+    title: "<yellow>%s1%'s Auctions"
+    rows: 6
+    listing-slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+    items:
+      filler:
+        material: "GRAY_STAINED_GLASS_PANE"
+        name: " "
+        lore: []
+      previous-page:
+        material: "ARROW"
+        slot: 48
+        name: "<reset><yellow><bold>Previous Page"
+        lore: []
+      next-page:
+        material: "ARROW"
+        slot: 50
+        name: "<reset><yellow><bold>Next Page"
+        lore: []
+      back:
+        material: "BARRIER"
+        slot: 49
+        name: "<reset><red>Back"
+        lore: []

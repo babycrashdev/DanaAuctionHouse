@@ -1,0 +1,71 @@
+plugins {
+    id 'com.gradleup.shadow' version '9.4.1'
+    id 'java'
+}
+
+group = 'cc.synkdev'
+version = '2.2.9'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        url = 'https://jitpack.io'
+    }
+    maven {
+        url = 'https://repo.aikar.co/content/groups/aikar/'
+    }
+    maven {
+        url = 'https://repo.codemc.io/repository/maven-snapshots/'
+    }
+    maven {
+        url = 'https://repo.triumphteam.dev/snapshots/'
+    }
+    maven {
+        url = 'https://mvn.wesjd.net/'
+    }
+}
+
+configurations.all {
+    exclude group: 'org.bukkit', module: 'bukkit'
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:26.1.2.build.70-stable'
+    compileOnly 'cc.synkdev:NexusCore:1.12.2'
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
+    compileOnly 'org.projectlombok:lombok:1.18.44'
+    annotationProcessor 'org.projectlombok:lombok:1.18.44'
+
+    implementation 'org.bstats:bstats-bukkit:3.0.2'
+    implementation 'dev.triumphteam:triumph-gui:3.1.13-SNAPSHOT'
+    implementation 'org.json:json:20250107'
+    implementation 'co.aikar:acf-bukkit:0.5.1-SNAPSHOT'
+    implementation 'net.wesjd:anvilgui:1.10.12-SNAPSHOT'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'org.bstats', 'cc.synkdev.bstats'
+    relocate 'dev.triumphteam.gui', 'cc.synkdev.gui'
+    relocate 'net.wesjd.anvilgui', 'cc.synkdev.anvilgui'
+}
+
+build {
+    dependsOn shadowJar
+}

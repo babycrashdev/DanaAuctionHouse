@@ -1,7 +1,7 @@
 package cc.synkdev.nah.objects;
 
 import cc.synkdev.nah.NexusAuctionHouse;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 
 import java.util.List;
 

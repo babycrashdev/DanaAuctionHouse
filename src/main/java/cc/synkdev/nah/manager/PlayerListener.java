@@ -1,7 +1,7 @@
 package cc.synkdev.nah.manager;
 
 import cc.synkdev.nah.NexusAuctionHouse;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +13,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin (PlayerJoinEvent event) {
         Player p = event.getPlayer();
-        if (core.retrieveMap.containsKey(p)) {
+        if (core.retrieveMap.containsKey(p.getUniqueId())) {
             p.sendMessage(core.prefix()+ ChatColor.GOLD+ Lang.translate("notifyExpîred", core));
         }
     }

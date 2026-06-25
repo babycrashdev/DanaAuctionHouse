@@ -4,7 +4,8 @@ import cc.synkdev.nah.NexusAuctionHouse;
 import cc.synkdev.nah.api.NAHUtil;
 import cc.synkdev.nah.manager.Util;
 import cc.synkdev.nah.objects.BINAuction;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
+import cc.synkdev.nah.manager.FileManager;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -30,28 +31,48 @@ public class PlayerAuctionsGui {
         this.snapshot = snapshot;
         this.contents = Util.getPlayerListings(target);
         core.checkExpiry.run();
-        max = (contents.size()+39)/40;
+        
+        List<Integer> listingSlots = FileManager.getGui().getIntegerList("menus.player-auctions.listing-slots");
+        if (listingSlots.isEmpty()) {
+            listingSlots = new ArrayList<>();
+            for (int i = 0; i < 45; i++) listingSlots.add(i);
+        }
+        int itemsPerPage = listingSlots.size();
+        max = (contents.size()+ (itemsPerPage - 1)) / itemsPerPage;
         this.target = target;
         this.page = page;
+
+        String titleStr = FileManager.getGui().getString("menus.player-auctions.title", "&e%s1%'s Auctions");
+        titleStr = Util.addPlaceholders(titleStr, target.getName() != null ? target.getName() : "");
+        Component titleComp = FileManager.parseMiniMessage(titleStr);
+
         Gui gui = Gui.gui()
                 .disableAllInteractions()
-                .title(Component.text(ChatColor.YELLOW+Lang.translate("playerTitle", core, target.getName())))
-                .rows(6)
+                .title(titleComp)
+                .rows(FileManager.getGuiRows("player-auctions", 6))
                 .create();
 
-        gui.getFiller().fillBottom(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).name(Component.text(" ")).asGuiItem());
-        if (page > 1) {
-            gui.setItem(6, 4, arrowLeft(page));
-        }
-        if (page < max) {
-            gui.setItem(6, 6, arrowRight(page));
+        gui.getFiller().fill(FileManager.getFillerItem("player-auctions"));
+
+        for (int slot : listingSlots) {
+            gui.removeItem(slot);
         }
 
-        fillGui(gui, p, page);
+        int prevPageSlot = FileManager.getGuiSlot("player-auctions", "previous-page", 48);
+        int nextPageSlot = FileManager.getGuiSlot("player-auctions", "next-page", 50);
 
-        if (snapshot != null) {
-            gui.setItem(6, 5, ItemBuilder.from(Material.BARRIER)
-                    .name(snapshot == null ? Component.text(ChatColor.RED + Lang.translate("close", core)) : Component.text(ChatColor.RED + Lang.translate("back", core)))
+        if (page > 1 && prevPageSlot >= 0) {
+            gui.setItem(prevPageSlot, arrowLeft(page));
+        }
+        if (page < max && nextPageSlot >= 0) {
+            gui.setItem(nextPageSlot, arrowRight(page));
+        }
+
+        fillGui(gui, p, page, listingSlots);
+
+        int backSlot = FileManager.getGuiSlot("player-auctions", "back", 49);
+        if (snapshot != null && backSlot >= 0) {
+            gui.setItem(backSlot, FileManager.getGuiItemBuilder("player-auctions", "back", Material.BARRIER, snapshot == null ? "&r&cClose" : "&r&cBack", null)
                     .asGuiItem(event -> {
                         new MainGui().gui(p, snapshot.getPage(), snapshot.getSearch(), snapshot.getFirstSort(), snapshot.getItSort()).open(p);
                     }));
@@ -59,29 +80,29 @@ public class PlayerAuctionsGui {
         return gui;
     }
     GuiItem arrowLeft(int page) {
-        return ItemBuilder.from(Material.ARROW)
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("prevPage", core))))
-                .asGuiItem(inventoryClickEvent -> {
-                    Player p = (Player) inventoryClickEvent.getWhoClicked();
-                    gui(p, target, page-1, snapshot).open(p);
-                });
+        return FileManager.getGuiItem("player-auctions", "previous-page", Material.ARROW, "&r&e&lPrevious Page", null, inventoryClickEvent -> {
+            Player p = (Player) inventoryClickEvent.getWhoClicked();
+            gui(p, target, page-1, snapshot).open(p);
+        });
     }
     GuiItem arrowRight(int page) {
-        return ItemBuilder.from(Material.ARROW)
-                .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e&l"+Lang.translate("nextPage", core))))
-                .asGuiItem(inventoryClickEvent -> {
-                    Player p = (Player) inventoryClickEvent.getWhoClicked();
-                    gui(p, target, page+1, snapshot).open(p);
-                });
+        return FileManager.getGuiItem("player-auctions", "next-page", Material.ARROW, "&r&e&lNext Page", null, inventoryClickEvent -> {
+            Player p = (Player) inventoryClickEvent.getWhoClicked();
+            gui(p, target, page+1, snapshot).open(p);
+        });
     }
-    private void fillGui(Gui gui, Player p, int page) {
-        int min = 45*(page-1);
-        int max = 45*page;
+    private void fillGui(Gui gui, Player p, int page, List<Integer> listingSlots) {
+        int itemsPerPage = listingSlots.size();
+        int min = itemsPerPage*(page-1);
+        int maxIndex = itemsPerPage*page;
 
-        for (int i = min; i < max; i++) {
+        int guiSlotIndex = 0;
+        for (int i = min; i < maxIndex; i++) {
             if (contents.size() > i) {
                 BINAuction bA = contents.get(i);
-                gui.setItem(i - min, buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+                if (guiSlotIndex >= listingSlots.size()) break;
+                gui.setItem(listingSlots.get(guiSlotIndex), buyableItem(bA, p.hasPermission("nah.menu.manage"), bA.getSeller().equals(p.getUniqueId())));
+                guiSlotIndex++;
             }
         }
     }
@@ -92,15 +113,25 @@ public class PlayerAuctionsGui {
         if (!shulker) {
             lore.addAll(Util.loreToComps(bA.getItem()));
         }
-        lore.addAll(Arrays.asList(Component.text(""), Component.text("  "+Lang.translate("price", core, Long.toString(bA.getPrice()))), Component.text("  "+Lang.translate("seller", core, Util.getName(bA.getSeller()))), Component.text("  "+Lang.translate("expiry", core, Util.convertSecondsToTime(bA.getExpiry()))), Component.text(""), Component.text(Lang.translate("buyNow", core))));
+        List<String> formatLore = FileManager.getGui().getStringList("listing-format.lore");
+        for (String line : formatLore) {
+            line = line.replace("%price%", Long.toString(bA.getPrice()))
+                       .replace("%seller%", Util.getName(bA.getSeller()))
+                       .replace("%expiry%", Util.convertSecondsToTime(bA.getExpiry()));
+            lore.add(FileManager.parseMiniMessage(line));
+        }
+
         if (shulker) {
-            lore.add(Component.text(Lang.translate("shulkerMenu", core)));
+            List<String> shulkerLore = FileManager.getGui().getStringList("listing-format.shulker-lore");
+            for (String line : shulkerLore) lore.add(FileManager.parseMiniMessage(line));
         }
         if (staff) {
-            lore.add(Component.text(Lang.translate("staffMenu", core)));
+            List<String> staffLore = FileManager.getGui().getStringList("listing-format.staff-lore");
+            for (String line : staffLore) lore.add(FileManager.parseMiniMessage(line));
         }
         if (self) {
-            lore.add(Component.text(Lang.translate("own-lore", core)));
+            List<String> ownLore = FileManager.getGui().getStringList("listing-format.own-lore");
+            for (String line : ownLore) lore.add(FileManager.parseMiniMessage(line));
         }
         return ItemBuilder.from(copy)
                 .lore(lore)

@@ -6,7 +6,7 @@ import cc.synkdev.nah.objects.BINAuction;
 import cc.synkdev.nah.objects.ItemSort;
 import cc.synkdev.nah.objects.SortingTypes;
 import cc.synkdev.nexusCore.bukkit.Analytics;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 import cc.synkdev.nexusCore.bukkit.UpdateChecker;
 import cc.synkdev.nexusCore.bukkit.Utils;
 import cc.synkdev.nexusCore.components.NexusPlugin;
@@ -96,7 +96,7 @@ public final class NexusAuctionHouse extends JavaPlugin implements NexusPlugin, 
             updateConfig();
             loadConfig();
 
-            reloadLang();
+            FileManager.init();
 
             DataFileManager.init();
             DataFileManager.load();
@@ -259,13 +259,7 @@ public final class NexusAuctionHouse extends JavaPlugin implements NexusPlugin, 
     }
 
     public void reloadLang() {
-        langMap.clear();
-        try {
-            langMap.putAll(Lang.init(this, langFile, lang));
-        } catch (NoSuchMethodError e) {
-            UpdateChecker.update(UpdateChecker.checkOutated());
-            Utils.log("&4Your NexusCore install seems to be outdated! Please restart your server to update it.");
-        }
+        // Obsolete, we use FileManager now
     }
 
     public void save() {

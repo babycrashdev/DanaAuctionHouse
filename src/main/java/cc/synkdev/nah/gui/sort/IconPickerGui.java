@@ -3,7 +3,7 @@ package cc.synkdev.nah.gui.sort;
 import cc.synkdev.nah.NexusAuctionHouse;
 import cc.synkdev.nah.manager.Util;
 import cc.synkdev.nah.objects.ItemSort;
-import cc.synkdev.nexusCore.bukkit.Lang;
+import cc.synkdev.nah.manager.Lang;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import net.kyori.adventure.text.Component;
@@ -54,7 +54,7 @@ public class IconPickerGui {
         }
         lore.add(Component.text(""));
         lore.add(Component.text(Lang.translate("clickSearch", core)));
-        gui.setItem(6, 2, ItemBuilder.from(Material.SIGN)
+        gui.setItem(6, 2, ItemBuilder.from(Material.OAK_SIGN)
                 .name(Component.text(ChatColor.translateAlternateColorCodes('&', "&r&e"+Lang.translate("search", core))))
                 .flags(ItemFlag.HIDE_ATTRIBUTES)
                 .lore(lore)
